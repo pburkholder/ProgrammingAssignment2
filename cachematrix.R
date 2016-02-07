@@ -1,6 +1,8 @@
 # cacheMatrix.R
-# Authors: Roger D. Peng, Peter Burkholder
+# Authors: Roger D. Peng, Peter D. Burkholder
 # License: none
+# Notes: pardon the excessive commenting and additional testCacheMatrix
+#  function; largely doing this for my own understanding of internals - PDB
 
 ## makeCacheMatrix(matrix x)
 ##   input: matrix
@@ -36,7 +38,7 @@ makeCacheMatrix <- function(x = matrix()) {
   list(
     set = set,
     get = get,
-    getsolution = getsolution
+    getsolution = getsolution,
     setsolution = setsolution
     )
 }
@@ -63,6 +65,35 @@ cacheSolve <- function(x, ...) {
   m <- solve(data, ...)
 
   # set m for later cache hit, and return solution m
-  x$set(m)
+  x$setsolution(m)
   m
+}
+
+## testCacheMatrix()
+##  returns TRUE if tests pass
+testCacheMatrix <- function() {
+  # from ?solve man page, create an 8x8 hilbert matrix
+  hilbert <- function(n) { i <- 1:n; 1 / outer(i - 1, i, "+") }
+  h8 <- hilbert(8)
+
+  # make a cacheMatrix object
+  cache8 <- makeCacheMatrix(h8)
+
+  # solve (and cache the solution)
+  solve8 <- cacheSolve(cache8)
+
+  # test for correct answer
+  ans1 <- round(solve8 %*% h8, 3)
+  stopifnot(all.equal(ans1, diag(8)))
+
+  # retrieve answer from cache, should message:
+  #  'getting cached data'
+  cachedSolve8 <- cacheSolve(cache8)
+
+  # test again
+  ans2 <- round(cachedSolve8 %*% h8, 3)
+  stopifnot(all.equal(ans2, diag(8)))
+
+  # return TRUE
+  TRUE
 }
