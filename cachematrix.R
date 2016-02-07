@@ -1,7 +1,8 @@
-## Put comments here that give an overall description of what your
-## functions do
+# cacheMatrix.R
+# Authors: Roger D. Peng, Peter Burkholder
+# License: none
 
-## makeCacheMatrix:
+## makeCacheMatrix(matrix x)
 ##   input: matrix
 ##   returns: list of functions on the matrix:
 ##     - set(x): set the matrix associated with this object
@@ -31,12 +32,37 @@ makeCacheMatrix <- function(x = matrix()) {
   # getsolution: return m, no input
   getsolution <- function() m
 
-  # return the 'list' of functions for
+  # return the 'list' of functions on this object
+  list(
+    set = set,
+    get = get,
+    getsolution = getsolution
+    setsolution = setsolution
+    )
 }
 
-
-## Write a short comment describing this function
+## cacheSolve(x)
+##   input: a makeCacheMatrix object
+##   returns: m, a solution 'solve()' of input
+##     and associates solution to input object
+##     for later cache retrieval
 
 cacheSolve <- function(x, ...) {
-        ## Return a matrix that is the inverse of 'x'
+  # fetch current solution from x (or NULL if not cached)
+  m <- x$getsolution()
+
+  # if not NULL, then return the cached value of m
+  if(!is.null(m)) {
+      message("getting cached data")
+      return(m)
+  }
+
+  # extract data from x with get(),
+  # then assign matrix inverse to m
+  data <- x$get()
+  m <- solve(data, ...)
+
+  # set m for later cache hit, and return solution m
+  x$set(m)
+  m
 }
